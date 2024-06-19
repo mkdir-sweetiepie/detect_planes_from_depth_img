@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/hyeon/catkin_ws/src/ros_detect_planes_from_depth_img/build/devel/setup.sh

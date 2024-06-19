@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import open3d
+import open3d as o3d
 import cv2
 import matplotlib.pyplot as plt
 import copy
@@ -141,22 +141,34 @@ class PlaneDetector(object):
             pcd {open3d.geometry.PointCloud}
         '''
 
-        rgbd_image = open3d.create_rgbd_image_from_color_and_depth(
-            color=open3d.Image(
-                cv2.cvtColor(color_img_resized, cv2.COLOR_BGR2RGB)),
-            depth=open3d.Image(depth_img_resized),
-            depth_scale=1.0/self._cfg.depth_unit,
-            depth_trunc=self._cfg.depth_trunc,
-            convert_rgb_to_intensity=False)
+        # Convert color image to RGB format (Open3D expects RGB).
+        color_img_resized_rgb = cv2.cvtColor(color_img_resized, cv2.COLOR_BGR2RGB)
 
-        cam_intrin = self._cam_intrin_resized.to_open3d_format()
-        pcd = open3d.create_point_cloud_from_rgbd_image(
+        # Create Open3D RGBD image.
+        rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
+            o3d.geometry.Image(color_img_resized_rgb),
+            o3d.geometry.Image(depth_img_resized),
+            depth_scale=1.0 / self._cfg.depth_unit,
+            depth_trunc=self._cfg.depth_trunc,
+            convert_rgb_to_intensity=False
+        )
+
+        # Convert camera intrinsics to Open3D format.
+        intrinsic = self._cam_intrin_resized.to_open3d_format()
+
+        # Create identity extrinsic matrix (if you don't have it already).
+        extrinsic = np.identity(4)
+
+        # Create point cloud.
+        pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
             rgbd_image,
-            cam_intrin)
+            intrinsic,
+            extrinsic,    
+            project_valid_depth_only=True  # Adjust this as needed
+        )
 
         if self._cfg.cloud_downsample_voxel_size > 0:
-            pcd = open3d.geometry.voxel_down_sample(
-                pcd, voxel_size=self._cfg.cloud_downsample_voxel_size)
+            pcd = pcd.voxel_down_sample(voxel_size=self._cfg.cloud_downsample_voxel_size)
 
         return pcd
 
