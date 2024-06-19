@@ -1,4 +1,6 @@
 이 리포지토리는 (https://github.com/felixchenfy/ros_detect_planes_from_depth_img)를 포크한 것입니다.
+최신 버전과 맞지 않는 부분이 많아서 그냥 다운 받아서 쓰면 에러 발생할 수 있습니다. 
+코드부분은 최신 버전으로 업데이트해서 올렸으며, 나머지 부분은 가상환경을 써서 환경을 맞춰 사용했습니다.
 
 Detect Planes from Depth Image
 =======================================
